@@ -16172,6 +16172,27 @@
     }
     window.addEventListener('DOMContentLoaded', initAppSettings);
   </script>
+<!-- SHIM VERCEL -> GAS JEMBATAN - PASTE DI SINI -->
+<script>
+(function(){
+  if (location.hostname.includes('script.google.com')) return;
+  window.google = window.google || {};
+  window.google.script = window.google.script || {};
+  let successCb = null, failureCb = null;
+  function callGas(fn, args){
+    const p={action:fn};
+    if(fn==='authLogin'){p.loginId=args[0];p.password=args[1];}
+    else if(fn==='authMe'||fn==='authLogout'||fn==='getBranches'){p.sessionToken=args[0];}
+    else if(fn==='getDashboardSummary'||fn==='getFindings'){p.sessionToken=args[0];p.filters=JSON.stringify(args[1]||{});}
+    else if(fn==='getBranchExplorationData'){p.sessionToken=args[0];p.branchId=args[1];}
+    const url="https://script.google.com/macros/s/AKfycbzzIwYLANqGk5MEKQUyMWDAAIgyqHlDvWCia5wvxnptVuhmfUZpFWlsPlRFI9DRs-8lxw/exec?"+new URLSearchParams(p).toString();
+    fetch(url).then(r=>r.json()).then(res=>{if(successCb) successCb(res);}).catch(err=>{if(failureCb) failureCb(err);});
+  }
+  const h={withSuccessHandler(cb){successCb=cb;return this;},withFailureHandler(cb){failureCb=cb;return this;}};
+  ['getAppSettings','authLogin','authMe','authLogout','getDashboardSummary','getBranches','getBranchExplorationData','getFindings'].forEach(fn=>{h[fn]=function(...a){callGas(fn,a);return h;};});
+  window.google.script.run=h;
+})();
+</script>
 </body>
 
 </html>
